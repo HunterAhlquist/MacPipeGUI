@@ -8,7 +8,10 @@ import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'profiles' | 'build' | 'settings'>('profiles');
-  const loadApp = useStore(state => state.loadApp);
+  const { loadApp, version } = useStore(state => ({
+    loadApp: state.loadApp,
+    version: state.version
+  }));
 
   useEffect(() => {
     loadApp();
@@ -26,7 +29,7 @@ function App() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-white tracking-tight">MacPipeGUI Multi</h1>
-              <span className="bg-accent/10 text-accent text-[10px] px-2 py-0.5 rounded-full font-mono border border-accent/20">v1.0.0</span>
+              <span className="bg-accent/10 text-accent text-[10px] px-2 py-0.5 rounded-full font-mono border border-accent/20">v{version}</span>
             </div>
             <p className="text-text-muted text-xs">Steam Content Deployment Tool</p>
           </div>

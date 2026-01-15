@@ -5,6 +5,7 @@ interface AppState {
     profiles: AppProfile[];
     config: SteamConfig;
     selectedProfileId: string | null;
+    version: string;
 
     loadApp: () => Promise<void>;
     addProfile: (profile: AppProfile) => void;
@@ -18,12 +19,20 @@ export const useStore = create<AppState>((set, get) => ({
     profiles: [],
     config: { builderPath: '', loginName: '', rememberPassword: false },
     selectedProfileId: null,
+    version: '...',
 
     loadApp: async () => {
         try {
-            const profiles = await window.ipcRenderer.invoke('get-store', 'profiles') || [];
-            const config = await window.ipcRenderer.invoke('get-store', 'config') || { builderPath: '', loginName: '', rememberPassword: false };
-            set({ profiles, config });
+            const [profiles, config, version] = await Promise.all([
+                window.ipcRenderer.invoke('get-store', 'profiles'),
+                window.ipcRenderer.invoke('get-store', 'config'),
+                window.ipcRenderer.invoke('get-app-version')
+            ]);
+            set({
+                profiles: profiles || [],
+                config: config || { builderPath: '', loginName: '', rememberPassword: false },
+                version: version || '0.0.0'
+            });
         } catch (e) {
             console.error("Failed to load state", e);
         }

@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Windows
         working-directory: ./MacPipeGUI Electron
-        run: npx electron-builder --win --publish never
+        run: npm run build:win -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Build macOS
         working-directory: ./MacPipeGUI Electron
-        run: npx electron-builder --mac --publish never
+        run: npm run build:mac -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -85,7 +85,7 @@ jobs:
 
       - name: Build Linux
         working-directory: ./MacPipeGUI Electron
-        run: npx electron-builder --linux --publish never
+        run: npm run build:linux -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

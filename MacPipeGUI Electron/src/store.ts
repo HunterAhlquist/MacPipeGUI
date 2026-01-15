@@ -23,6 +23,10 @@ export const useStore = create<AppState>((set, get) => ({
 
     loadApp: async () => {
         try {
+            if (!window.ipcRenderer) {
+                console.error("ipcRenderer not available");
+                return;
+            }
             const [profiles, config, version] = await Promise.all([
                 window.ipcRenderer.invoke('get-store', 'profiles'),
                 window.ipcRenderer.invoke('get-store', 'config'),
@@ -41,13 +45,17 @@ export const useStore = create<AppState>((set, get) => ({
     addProfile: (profile) => {
         const newProfiles = [...get().profiles, profile];
         set({ profiles: newProfiles });
-        window.ipcRenderer.invoke('set-store', 'profiles', newProfiles);
+        if (window.ipcRenderer) {
+            window.ipcRenderer.invoke('set-store', 'profiles', newProfiles);
+        }
     },
 
     updateProfile: (profile) => {
         const newProfiles = get().profiles.map(p => p.id === profile.id ? profile : p);
         set({ profiles: newProfiles });
-        window.ipcRenderer.invoke('set-store', 'profiles', newProfiles);
+        if (window.ipcRenderer) {
+            window.ipcRenderer.invoke('set-store', 'profiles', newProfiles);
+        }
     },
 
     deleteProfile: (id) => {
@@ -56,13 +64,17 @@ export const useStore = create<AppState>((set, get) => ({
         if (get().selectedProfileId === id) {
             set({ selectedProfileId: null });
         }
-        window.ipcRenderer.invoke('set-store', 'profiles', newProfiles);
+        if (window.ipcRenderer) {
+            window.ipcRenderer.invoke('set-store', 'profiles', newProfiles);
+        }
     },
 
     selectProfile: (id) => set({ selectedProfileId: id }),
 
     updateConfig: (config) => {
         set({ config });
-        window.ipcRenderer.invoke('set-store', 'config', config);
+        if (window.ipcRenderer) {
+            window.ipcRenderer.invoke('set-store', 'config', config);
+        }
     }
 }));

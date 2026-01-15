@@ -3,12 +3,17 @@ import { useStore } from '../store';
 import { AppProfile, DepotConfig } from '../types';
 import { Plus, Trash2, Package, Cuboid, AppWindow, Search, CreditCard, FolderOpen } from 'lucide-react';
 
+function generateId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 export default function ProfilesPage() {
     const { profiles, addProfile, selectProfile, selectedProfileId, deleteProfile } = useStore();
 
     const handleCreate = () => {
         const newProfile: AppProfile = {
-            id: crypto.randomUUID(),
+            id: generateId(),
             appName: 'New App Profile',
             appID: '',
             description: '',
@@ -142,7 +147,7 @@ function ProfileEditor({ profile }: { profile: AppProfile }) {
 
     const addDepot = () => {
         const newDepot: DepotConfig = {
-            id: crypto.randomUUID(),
+            id: generateId(),
             DepotName: 'New Depot',
             DepotID: '',
             ContentRoot: ''

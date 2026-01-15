@@ -1,0 +1,36 @@
+appId: com.macpipegui.multi
+productName: MacPipeGUI Multi
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist
+  - dist-electron
+publish:
+  provider: github
+  owner: sakne
+  repo: MacPipeGUI
+  releaseType: release
+win:
+  icon: public/app-icon.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  shortcutName: MacPipeGUI Multi
+  uninstallDisplayName: MacPipeGUI Multi
+mac:
+  icon: public/app-icon.png
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+linux:
+  icon: public/app-icon.png
+  target:
+    - AppImage
+  category: Development

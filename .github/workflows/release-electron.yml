@@ -7,13 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,59 +22,80 @@ jobs:
         working-directory: ./MacPipeGUI Electron
         run: npm install
 
-      - name: Build for Windows
-        if: matrix.os == 'windows-latest'
+      - name: Build Windows
         working-directory: ./MacPipeGUI Electron
+        run: npx electron-builder --win --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:win
-
-      - name: Build for macOS
-        if: matrix.os == 'macos-latest'
-        working-directory: ./MacPipeGUI Electron
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:mac
-
-      - name: Build for Linux
-        if: matrix.os == 'ubuntu-latest'
-        working-directory: ./MacPipeGUI Electron
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:linux
 
       - name: Upload Windows artifacts
-        if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: |
             MacPipeGUI Electron/release/*.exe
             MacPipeGUI Electron/release/latest.yml
-          if-no-files-found: warn
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./MacPipeGUI Electron
+        run: npm install
+
+      - name: Build macOS
+        working-directory: ./MacPipeGUI Electron
+        run: npx electron-builder --mac --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload macOS artifacts
-        if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
           path: |
             MacPipeGUI Electron/release/*.dmg
             MacPipeGUI Electron/release/latest-mac.yml
-          if-no-files-found: warn
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./MacPipeGUI Electron
+        run: npm install
+
+      - name: Build Linux
+        working-directory: ./MacPipeGUI Electron
+        run: npx electron-builder --linux --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Linux artifacts
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: linux-build
           path: |
             MacPipeGUI Electron/release/*.AppImage
             MacPipeGUI Electron/release/latest-linux.yml
-          if-no-files-found: warn
 
   release:
-    needs: build
+    needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     

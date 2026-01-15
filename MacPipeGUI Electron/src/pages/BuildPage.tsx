@@ -5,7 +5,8 @@ import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function BuildPage() {
-    const { profiles, config } = useStore();
+    const profiles = useStore(state => state.profiles);
+    const config = useStore(state => state.config);
     const [selectedId, setSelectedId] = useState<string>('');
     const [isBuilding, setIsBuilding] = useState(false);
     const [logs, setLogs] = useState<string[]>([]);

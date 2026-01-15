@@ -9,7 +9,11 @@ function generateId() {
 }
 
 export default function ProfilesPage() {
-    const { profiles, addProfile, selectProfile, selectedProfileId, deleteProfile } = useStore();
+    const profiles = useStore(state => state.profiles);
+    const addProfile = useStore(state => state.addProfile);
+    const selectProfile = useStore(state => state.selectProfile);
+    const selectedProfileId = useStore(state => state.selectedProfileId);
+    const deleteProfile = useStore(state => state.deleteProfile);
 
     const handleCreate = () => {
         const newProfile: AppProfile = {
@@ -120,7 +124,7 @@ export default function ProfilesPage() {
 }
 
 function ProfileEditor({ profile }: { profile: AppProfile }) {
-    const { updateProfile } = useStore();
+    const updateProfile = useStore(state => state.updateProfile);
     const [localProfile, setLocalProfile] = useState<AppProfile>(profile);
     const [isDirty, setIsDirty] = useState(false);
 

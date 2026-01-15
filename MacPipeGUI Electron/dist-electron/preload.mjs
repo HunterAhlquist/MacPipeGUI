@@ -1,1 +1,22 @@
-"use strict";const o=require("electron");o.contextBridge.exposeInMainWorld("ipcRenderer",{on(...n){const[e,r]=n,t=(c,...i)=>r(c,...i);return o.ipcRenderer.on(e,t),()=>o.ipcRenderer.removeListener(e,t)},off(...n){const[e,...r]=n;return o.ipcRenderer.off(e,...r)},send(...n){const[e,...r]=n;return o.ipcRenderer.send(e,...r)},invoke(...n){const[e,...r]=n;return o.ipcRenderer.invoke(e,...r)}});
+"use strict";
+const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("ipcRenderer", {
+  on(...args) {
+    const [channel, listener] = args;
+    const subscription = (event, ...args2) => listener(event, ...args2);
+    electron.ipcRenderer.on(channel, subscription);
+    return () => electron.ipcRenderer.removeListener(channel, subscription);
+  },
+  off(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.off(channel, ...omit);
+  },
+  send(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.send(channel, ...omit);
+  },
+  invoke(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.invoke(channel, ...omit);
+  }
+});

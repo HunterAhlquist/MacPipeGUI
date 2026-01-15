@@ -8,10 +8,8 @@ import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'profiles' | 'build' | 'settings'>('profiles');
-  const { loadApp, version } = useStore(state => ({
-    loadApp: state.loadApp,
-    version: state.version
-  }));
+  const loadApp = useStore(state => state.loadApp);
+  const version = useStore(state => state.version);
 
   useEffect(() => {
     loadApp();

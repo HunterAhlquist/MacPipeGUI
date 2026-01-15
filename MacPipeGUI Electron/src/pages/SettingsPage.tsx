@@ -3,7 +3,8 @@ import { useStore } from '../store';
 import { FolderOpen, Save, Settings as SettingsIcon, Shield, ShieldOff, Eye, EyeOff, Lock } from 'lucide-react';
 
 export default function SettingsPage() {
-    const { config, updateConfig } = useStore();
+    const config = useStore(state => state.config);
+    const updateConfig = useStore(state => state.updateConfig);
     const [builderPath, setBuilderPath] = useState(config.builderPath);
     const [loginName, setLoginName] = useState(config.loginName);
     const [password, setPassword] = useState('');

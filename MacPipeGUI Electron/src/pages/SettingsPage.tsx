@@ -14,6 +14,8 @@ export default function SettingsPage() {
     const [validationStatus, setValidationStatus] = useState<{ valid: boolean, message: string } | null>(null);
     const [passwordSaveStatus, setPasswordSaveStatus] = useState<string | null>(null);
 
+    const setTempPassword = useStore(state => state.setTempPassword);
+
     // Load saved password on mount
     useEffect(() => {
         const loadPassword = async () => {
@@ -27,6 +29,7 @@ export default function SettingsPage() {
                 const result = await ipc.invoke('get-secure-password');
                 if (result.success && result.password) {
                     setPassword(result.password);
+                    setTempPassword(result.password); // Also set current session password
                 }
             } catch (e) {
                 console.error('Failed to load password:', e);
@@ -41,7 +44,14 @@ export default function SettingsPage() {
         // Save config
         updateConfig({ ...config, builderPath, loginName, rememberPassword });
 
-        // Handle password
+        // Update session password immediately
+        if (password) {
+            setTempPassword(password);
+        } else {
+            setTempPassword(null);
+        }
+
+        // Handle secure storage
         if (ipc) {
             if (rememberPassword && password) {
                 const result = await ipc.invoke('save-secure-password', password);
@@ -50,9 +60,14 @@ export default function SettingsPage() {
                 } else {
                     setPasswordSaveStatus('❌ Failed to save password');
                 }
-            } else if (!rememberPassword) {
+            } else {
+                // If not remembering, clear from disk but keep in session (via setTempPassword above)
                 await ipc.invoke('clear-secure-password');
-                setPasswordSaveStatus('🗑️ Password cleared');
+                if (password) {
+                    setPasswordSaveStatus('ℹ️ Using session password (unsaved)');
+                } else {
+                    setPasswordSaveStatus('🗑️ Password cleared');
+                }
             }
         }
 
@@ -147,8 +162,7 @@ export default function SettingsPage() {
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                disabled={!rememberPassword}
-                                className={`w-full bg-bg-main border border-white/10 rounded-lg pl-10 pr-12 py-3 text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50 font-semibold transition-all ${!rememberPassword ? 'opacity-50' : ''}`}
+                                className="w-full bg-bg-main border border-white/10 rounded-lg pl-10 pr-12 py-3 text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50 font-semibold transition-all"
                                 placeholder="••••••••"
                             />
                             <button
@@ -180,9 +194,9 @@ export default function SettingsPage() {
                         </div>
 
                         {!rememberPassword && (
-                            <p className="text-xs text-yellow-500/80 flex items-center gap-2">
-                                <span className="text-yellow-500">⚠️</span>
-                                Password will not be saved. You'll need to enter it each time you build.
+                            <p className="text-xs text-blue-400 flex items-center gap-2">
+                                <span className="text-blue-400">ℹ️</span>
+                                Password will be used for this session only and will NOT be saved to disk.
                             </p>
                         )}
 

@@ -13,6 +13,8 @@ interface AppState {
     deleteProfile: (id: string) => void;
     selectProfile: (id: string | null) => void;
     updateConfig: (config: SteamConfig) => void;
+    tempPassword: string | null;
+    setTempPassword: (password: string | null) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -76,5 +78,8 @@ export const useStore = create<AppState>((set, get) => ({
         if (window.ipcRenderer) {
             window.ipcRenderer.invoke('set-store', 'config', config);
         }
-    }
+    },
+
+    tempPassword: null,
+    setTempPassword: (password) => set({ tempPassword: password })
 }));

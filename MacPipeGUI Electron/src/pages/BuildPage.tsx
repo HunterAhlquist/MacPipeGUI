@@ -70,10 +70,19 @@ export default function BuildPage() {
             return;
         }
 
-        // Get password from secure storage
-        const passResult = await ipc.invoke('get-secure-password');
-        if (!passResult.success || !passResult.password) {
-            alert('Please save your Steam Password in Settings first!');
+        // Try to get password from session store first, then secure storage
+        let finalPassword = useStore.getState().tempPassword;
+
+        if (!finalPassword) {
+            // Fallback to secure storage
+            const passResult = await ipc.invoke('get-secure-password');
+            if (passResult.success && passResult.password) {
+                finalPassword = passResult.password;
+            }
+        }
+
+        if (!finalPassword) {
+            alert('Please enter your Steam Password in Settings first!');
             return;
         }
 
@@ -81,7 +90,7 @@ export default function BuildPage() {
         setIsBuilding(true);
 
         ipc.invoke('generate-vdf', selectedProfile, config).then(() => {
-            ipc.send('run-build', selectedProfile, config, passResult.password);
+            ipc.send('run-build', selectedProfile, config, finalPassword);
         }).catch((err: any) => {
             setLogs(prev => [...prev, `❌ VDF Generation Error: ${err}`]);
             setIsBuilding(false);

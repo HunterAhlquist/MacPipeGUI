@@ -257,6 +257,7 @@ function AboutSection() {
     const [updateStatus, setUpdateStatus] = useState<string | null>(null);
     const [isChecking, setIsChecking] = useState(false);
     const [updateInfo, setUpdateInfo] = useState<{ available: boolean; version?: string } | null>(null);
+    const [updateDownloaded, setUpdateDownloaded] = useState(false);
 
     useEffect(() => {
         const loadVersion = async () => {
@@ -264,6 +265,12 @@ function AboutSection() {
             if (ipc) {
                 const version = await ipc.invoke('get-app-version');
                 setAppVersion(version);
+
+                // Listen for update downloaded event
+                ipc.on('update-downloaded', () => {
+                    setUpdateDownloaded(true);
+                    setUpdateStatus('✅ Update downloaded! Click "Install & Restart" to apply.');
+                });
             }
         };
         loadVersion();
@@ -306,9 +313,7 @@ function AboutSection() {
 
         setUpdateStatus('📥 Downloading update...');
         const result = await ipc.invoke('download-update');
-        if (result.success) {
-            setUpdateStatus('✅ Update downloaded! Click "Install & Restart" to apply.');
-        } else {
+        if (!result.success) {
             setUpdateStatus(`❌ Download failed: ${result.error}`);
         }
     };
@@ -331,21 +336,22 @@ function AboutSection() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {updateInfo?.available && (
-                        <>
-                            <button
-                                onClick={downloadUpdate}
-                                className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                            >
-                                Download v{updateInfo.version}
-                            </button>
-                            <button
-                                onClick={installUpdate}
-                                className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                            >
-                                Install & Restart
-                            </button>
-                        </>
+                    {updateInfo?.available && !updateDownloaded && (
+                        <button
+                            onClick={downloadUpdate}
+                            className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            Download v{updateInfo.version}
+                        </button>
+                    )}
+
+                    {updateDownloaded && (
+                        <button
+                            onClick={installUpdate}
+                            className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            Install & Restart
+                        </button>
                     )}
 
                     {!updateInfo?.available && (

@@ -6,6 +6,8 @@ import { SteamRunner } from './steam-runner'
 import Store from 'electron-store'
 import { autoUpdater } from 'electron-updater'
 
+import fs from 'node:fs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 process.env.APP_ROOT = path.join(__dirname, '..')
@@ -17,7 +19,26 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null
-const store = new Store();
+let store: Store;
+
+try {
+  store = new Store();
+} catch (error) {
+  console.error('Failed to initialize store, attempting to reset:', error);
+  try {
+    const userDataPath = app.getPath('userData');
+    const configPath = path.join(userDataPath, 'config.json');
+    if (fs.existsSync(configPath)) {
+      fs.unlinkSync(configPath);
+      console.log('Corrupted config file deleted.');
+    }
+    store = new Store();
+  } catch (retryError) {
+    console.error('Failed to recover store:', retryError);
+    // If it still fails, we can't do much, but at least we tried.
+    throw retryError;
+  }
+}
 
 const SECURE_PASSWORD_KEY = 'secure_steam_password';
 

@@ -89,6 +89,8 @@ export class SteamRunner {
         };
 
         let lastProgressLine = '';
+        let mobileAuthNotified = false;
+        let emailPromptShown = false;
         let lastMessage = '';
 
         // Start watching log file every 200ms for real-time updates
@@ -171,6 +173,25 @@ export class SteamRunner {
                 }
 
                 const lowerOutput = logContent.content.toLowerCase();
+
+                // Email Verification Code
+                if (!emailPromptShown && (
+                    lowerOutput.includes('enter the special access code') ||
+                    lowerOutput.includes('steam guard code')
+                )) {
+                    emailPromptShown = true;
+                    mobileAuthNotified = true;
+                    window.webContents.send('steam-guard-request');
+
+                    if (Notification.isSupported()) {
+                        new Notification({
+                            title: 'Steam Guard Required',
+                            body: 'Please enter the code sent to your email.',
+                            icon: undefined
+                        }).show();
+                    }
+                }
+
                 if (!mobileAuthNotified && (
                     lowerOutput.includes('steam mobile app') ||
                     lowerOutput.includes('confirm the login') ||
@@ -194,7 +215,50 @@ export class SteamRunner {
             windowsHide: true
         });
 
-        let mobileAuthNotified = false;
+        const checkOutputForTriggers = (output: string) => {
+            const lowerOutput = output.toLowerCase();
+
+            // Email Verification Code
+            if (!emailPromptShown && (
+                lowerOutput.includes('enter the special access code') ||
+                lowerOutput.includes('steam guard code') ||
+                lowerOutput.includes('email address') && lowerOutput.includes('code')
+            )) {
+                emailPromptShown = true;
+                mobileAuthNotified = true;
+                window.webContents.send('steam-guard-request');
+
+                if (Notification.isSupported()) {
+                    new Notification({
+                        title: 'Steam Guard Required',
+                        body: 'Please enter the code sent to your email.',
+                        icon: undefined
+                    }).show();
+                }
+            }
+
+            // Mobile Auth
+            if (!mobileAuthNotified && (
+                lowerOutput.includes('steam mobile app') ||
+                lowerOutput.includes('confirm the login') ||
+                lowerOutput.includes('mobile authenticator') ||
+                lowerOutput.includes('waiting for confirmation')
+            )) {
+                mobileAuthNotified = true;
+                if (Notification.isSupported()) {
+                    new Notification({
+                        title: 'Steam Mobile Confirmation Required',
+                        body: 'Please confirm the login in your Steam Mobile app.',
+                        icon: undefined
+                    }).show();
+                }
+            }
+        };
+
+        this.process.stdout.on('data', (data) => checkOutputForTriggers(data.toString()));
+        this.process.stderr.on('data', (data) => checkOutputForTriggers(data.toString()));
+
+        // mobileAuthNotified initialized above
 
         const proactiveNotifyTimeout = setTimeout(() => {
             if (!mobileAuthNotified && this.process) {

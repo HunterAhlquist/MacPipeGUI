@@ -27,9 +27,7 @@ jobs:
 
       - name: Build Windows
         working-directory: ./MacPipeGUI Electron
-        run: npm run build:win -- --publish never
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:win -- --publish always
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -56,9 +54,7 @@ jobs:
 
       - name: Build macOS
         working-directory: ./MacPipeGUI Electron
-        run: npm run build:mac -- --publish never
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:mac -- --publish always
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
@@ -85,9 +81,7 @@ jobs:
 
       - name: Build Linux
         working-directory: ./MacPipeGUI Electron
-        run: npm run build:linux -- --publish never
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:linux -- --publish always
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4

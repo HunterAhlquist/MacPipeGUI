@@ -22,7 +22,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   shortcutName: MacPipeGUI Multi
   uninstallDisplayName: MacPipeGUI Multi
-  artifactName: ${productName}-Setup-${version}.${ext}
+  artifactName: MacPipeGUI-Multi-Setup-${version}.${ext}
 mac:
   icon: public/app-icon.png
   target:

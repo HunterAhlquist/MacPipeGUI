@@ -259,7 +259,7 @@ export class SteamRunner {
             }
             if (lowerOutput.includes("building depot")){
                 const depotMatch = lowerOutput.match(/building depot (\d+)/);
-                const depotId = depotMatch ? depotMatch[1] : null;
+                const depotId = depotMatch ? depotMatch[1] : "?";
                 window.webContents.send("build-log", `⚙️ Scanning and uploading depot with ID ${depotId}...`);
             }
         };
